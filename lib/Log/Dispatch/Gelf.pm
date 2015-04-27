@@ -47,10 +47,11 @@ sub _init {
 
 sub log_message {
     my ($self, %p) = @_;
+    (my $short_message = $p{message}) =~ s/\n.*//s;
     my $log_unit = {
         version       => $self->{gelf_version},
         host          => $self->{host},
-        short_message => $p{message}, #FIXME (only first line?)
+        short_message => $short_message,
         timestamp     => time(),
         level         => $p{level},
         full_message  => $p{message},
