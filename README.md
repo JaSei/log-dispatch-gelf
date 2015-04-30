@@ -24,7 +24,7 @@ according to Graylog's GELF Format and sends it using user-provided sender.
 
 # LICENSE
 
-Copyright (C) Miroslav Tynovsky.
+Copyright (C) Avast Software.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

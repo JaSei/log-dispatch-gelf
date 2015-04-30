@@ -55,5 +55,16 @@
       }
    },
    "release_status" : "unstable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/tynovsky/log-dispatch-gelf/issues"
+      },
+      "homepage" : "https://github.com/tynovsky/log-dispatch-gelf",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/tynovsky/log-dispatch-gelf.git",
+         "web" : "https://github.com/tynovsky/log-dispatch-gelf"
+      }
+   },
    "version" : "0.1.0"
 }
