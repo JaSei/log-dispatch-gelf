@@ -38,7 +38,7 @@ sub _init {
     );
 
     $self->{host}              = $p{host} // hostname();
-    $self->{additional_fields} = $p{additional_fields} //{};
+    $self->{additional_fields} = $p{additional_fields} // {};
     $self->{send_sub}          = $p{send_sub};
     $self->{gelf_version}      = '1.1';
 
@@ -48,6 +48,12 @@ sub _init {
 sub log_message {
     my ($self, %p) = @_;
     (my $short_message = $p{message}) =~ s/\n.*//s;
+
+    my %additional_fields;
+    while (my ($key, $value) = each %{ $self->{additional_fields} }) {
+        $additional_fields{"_$key"} = $value;
+    }
+
     my $log_unit = {
         version       => $self->{gelf_version},
         host          => $self->{host},
@@ -55,9 +61,9 @@ sub log_message {
         timestamp     => time(),
         level         => $p{level},
         full_message  => $p{message},
-
-        %{ $self->{additional_fields} },
+        %additional_fields,
     };
+
     $self->{send_sub}->(encode_json($log_unit));
 
     return
