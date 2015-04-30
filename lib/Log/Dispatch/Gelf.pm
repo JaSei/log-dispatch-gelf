@@ -37,10 +37,14 @@ sub _init {
         }
     );
 
-    $self->{host}              = $p{host} // hostname();
-    $self->{additional_fields} = $p{additional_fields} // {};
-    $self->{send_sub}          = $p{send_sub};
-    $self->{gelf_version}      = '1.1';
+    $self->{host}               = $p{host} // hostname();
+    $self->{additional_fields}  = $p{additional_fields} // {};
+    $self->{send_sub}           = $p{send_sub};
+    $self->{gelf_version}       = '1.1';
+
+    my $i = 0;
+    $self->{number_of_loglevel}{$_} = $i++
+        for qw(debug info notice warning error critical alert emergency);
 
     return
 }
@@ -54,12 +58,13 @@ sub log_message {
         $additional_fields{"_$key"} = $value;
     }
 
+
     my $log_unit = {
         version       => $self->{gelf_version},
         host          => $self->{host},
         short_message => $short_message,
         timestamp     => time(),
-        level         => $p{level},
+        level         => $self->{number_of_loglevel}{ $p{level} },
         full_message  => $p{message},
         %additional_fields,
     };
