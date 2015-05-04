@@ -1,5 +1,5 @@
 {
-   "abstract" : "It's new $module",
+   "abstract" : "Log::Dispatch plugin for Graylog's GELF format.",
    "author" : [
       "Miroslav Tynovsky <tynovsky@avast.com>"
    ],

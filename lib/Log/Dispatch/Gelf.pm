@@ -44,7 +44,7 @@ sub _init {
 
     my $i = 0;
     $self->{number_of_loglevel}{$_} = $i++
-        for qw(debug info notice warning error critical alert emergency);
+        for qw(emergency alert critical error warning notice info debug);
 
     return
 }
