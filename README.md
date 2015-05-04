@@ -1,6 +1,6 @@
 # NAME
 
-Log::Dispatch::Gelf - It's new $module
+Log::Dispatch::Gelf - Log::Dispatch plugin for Graylog's GELF format.
 
 # SYNOPSIS
 
@@ -20,7 +20,21 @@ Log::Dispatch::Gelf - It's new $module
 # DESCRIPTION
 
 Log::Dispatch::Gelf is Log::Dispatch plugin which formats the log message
-according to Graylog's GELF Format and sends it using user-provided sender.
+according to Graylog's GELF Format version 1.1 and sends it using user-provided
+sender.
+
+The constructor takes the following parameters in addition to the standard
+parameters documented in [Log::Dispatch::Output](https://metacpan.org/pod/Log::Dispatch::Output):
+
+- additional\_fields
+
+    optional hashref of additional fields of the gelf message (no need to prefix
+    them with \_, the prefixing is done automatically).
+
+- send\_sub
+
+    mandatory sub for sending the message to graylog. It is triggered after the
+    gelf message is generated.
 
 # LICENSE
 

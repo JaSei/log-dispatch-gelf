@@ -20,7 +20,7 @@ $log->info("It works\nMore details.");
 note "formatted message: $LAST_LOG_MSG";
 
 my $msg = decode_json($LAST_LOG_MSG);
-is($msg->{level}, 'info', 'correct level');
+is($msg->{level}, 6, 'correct level info');
 is($msg->{short_message}, 'It works', 'short_message correct');
 is($msg->{full_message}, "It works\nMore details.", 'full_message correct');
 is($msg->{_facility}, __FILE__, 'facility correct');
