@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/avast/log-dispatch-gelf.svg?branch=master)](https://travis-ci.org/avast/log-dispatch-gelf)
 # NAME
 
 Log::Dispatch::Gelf - Log::Dispatch plugin for Graylog's GELF format.

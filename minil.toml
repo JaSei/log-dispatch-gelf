@@ -1,4 +1,4 @@
 name = "Log-Dispatch-Gelf"
-# badges = ["travis"]
+badges = ["travis"]
 module_maker="ModuleBuildTiny"
 
