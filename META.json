@@ -57,14 +57,17 @@
    "release_status" : "unstable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://github.com/tynovsky/log-dispatch-gelf/issues"
+         "web" : "https://github.com/avast/log-dispatch-gelf/issues"
       },
-      "homepage" : "https://github.com/tynovsky/log-dispatch-gelf",
+      "homepage" : "https://github.com/avast/log-dispatch-gelf",
       "repository" : {
          "type" : "git",
-         "url" : "git://github.com/tynovsky/log-dispatch-gelf.git",
-         "web" : "https://github.com/tynovsky/log-dispatch-gelf"
+         "url" : "git://github.com/avast/log-dispatch-gelf.git",
+         "web" : "https://github.com/avast/log-dispatch-gelf"
       }
    },
-   "version" : "0.1.0"
+   "version" : "0.1.0",
+   "x_contributors" : [
+      "tynovsky <tynovsky@seznam.cz>"
+   ]
 }
