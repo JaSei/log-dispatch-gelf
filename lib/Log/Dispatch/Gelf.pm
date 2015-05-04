@@ -58,7 +58,6 @@ sub log_message {
         $additional_fields{"_$key"} = $value;
     }
 
-
     my $log_unit = {
         version       => $self->{gelf_version},
         host          => $self->{host},
@@ -69,7 +68,7 @@ sub log_message {
         %additional_fields,
     };
 
-    $self->{send_sub}->(encode_json($log_unit));
+    $self->{send_sub}->(to_json($log_unit, {canonical => 1}) . "\n");
 
     return
 }
@@ -81,7 +80,7 @@ __END__
 
 =head1 NAME
 
-Log::Dispatch::Gelf - It's new $module
+Log::Dispatch::Gelf - Log::Dispatch plugin for Graylog's GELF format.
 
 =head1 SYNOPSIS
 
@@ -101,7 +100,26 @@ Log::Dispatch::Gelf - It's new $module
 =head1 DESCRIPTION
 
 Log::Dispatch::Gelf is Log::Dispatch plugin which formats the log message
-according to Graylog's GELF Format and sends it using user-provided sender.
+according to Graylog's GELF Format version 1.1 and sends it using user-provided
+sender.
+
+The constructor takes the following parameters in addition to the standard
+parameters documented in L<Log::Dispatch::Output>:
+
+=over
+
+=item additional_fields
+
+optional hashref of additional fields of the gelf message (no need to prefix
+them with _, the prefixing is done automatically).
+
+=item send_sub
+
+mandatory sub for sending the message to graylog. It is triggered after the
+gelf message is generated.
+
+=back
+
 
 =head1 LICENSE
 
