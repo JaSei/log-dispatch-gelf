@@ -89,7 +89,7 @@ sub _create_socket {
         PeerAddr => $socket_opts->{host},
         PeerPort => $socket_opts->{port},
         Proto    => $socket_opts->{protocol},
-    );
+    ) or die "Cannot create socket: $!";
 
     $self->{send_sub} = sub {
         my ($msg) = @_;
