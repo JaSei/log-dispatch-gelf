@@ -65,12 +65,4 @@ it under the same terms as Perl itself.
 
 # AUTHOR
 
-Miroslav Tynovsky &lt;tynovsky@avast.com>
-
-# POD ERRORS
-
-Hey! **The above document had some coding errors, which are explained below:**
-
-- Around line 184:
-
-    '=item' outside of any '=over'
+Miroslav Tynovsky <tynovsky@avast.com>

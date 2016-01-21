@@ -174,12 +174,12 @@ parameters documented in L<Log::Dispatch::Output>:
 optional hashref of additional fields of the gelf message (no need to prefix
 them with _, the prefixing is done automatically).
 
+
 =item send_sub
 
 mandatory sub for sending the message to graylog. It is triggered after the
 gelf message is generated.
 
-=back
 
 =item socket
 
@@ -200,4 +200,3 @@ it under the same terms as Perl itself.
 Miroslav Tynovsky E<lt>tynovsky@avast.comE<gt>
 
 =cut
-
