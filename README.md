@@ -9,12 +9,26 @@ Log::Dispatch::Gelf - Log::Dispatch plugin for Graylog's GELF format.
 
     my $sender = ... # e.g. RabbitMQ queue.
     my $log = Log::Dispatch->new(
-        outputs => [ [
-            'Gelf',
-            min_level         => 'debug',
-            additional_fields => { facility => __FILE__ },
-            send_sub          => sub { $sender->send($_[0]) },
-        ] ],
+        outputs => [ 
+            #some custom sender
+            [
+                'Gelf',
+                min_level         => 'debug',
+                additional_fields => { facility => __FILE__ },
+                send_sub          => sub { $sender->send($_[0]) },
+            ],
+            #or send to graylog via TCP/UDP socket
+            [
+                'Gelf',
+                min_level         => 'debug',
+                additional_fields => { facility => __FILE__ },
+                socket            => {
+                    host     => 'graylog.server',
+                    port     => 21234,
+                    protocol => 'tcp',
+                }
+            ]
+        ],
     );
     $log->info('It works');
 
@@ -36,6 +50,11 @@ parameters documented in [Log::Dispatch::Output](https://metacpan.org/pod/Log::D
 
     mandatory sub for sending the message to graylog. It is triggered after the
     gelf message is generated.
+
+- socket
+
+    optional hashref create tcp or udp (default behavior) socket and set
+    `send_sub` to sending via socket
 
 # LICENSE
 
