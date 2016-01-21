@@ -41,6 +41,9 @@
          }
       },
       "runtime" : {
+         "recommends" : {
+            "JSON::XS" : "2.0"
+         },
          "requires" : {
             "JSON" : "0",
             "Log::Dispatch" : "0",
@@ -50,6 +53,8 @@
       },
       "test" : {
          "requires" : {
+            "Mock::Quick" : "1.107",
+            "Test::Exception" : "0.31",
             "Test::More" : "0.98"
          }
       }
@@ -66,8 +71,9 @@
          "web" : "https://github.com/avast/log-dispatch-gelf"
       }
    },
-   "version" : "0.1.0",
+   "version" : "1.0.0",
    "x_contributors" : [
-      "tynovsky <tynovsky@seznam.cz>"
+      "tynovsky <tynovsky@seznam.cz>",
+      "Jan Seidl <seidl@avast.com>"
    ]
 }
