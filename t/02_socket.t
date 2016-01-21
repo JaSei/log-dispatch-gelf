@@ -30,7 +30,7 @@ throws_ok {
         ],
     );
 }
-qr/^socket host must be set/, 'undefined socket host';
+qr/socket host must be set/, 'undefined socket host';
 
 throws_ok {
     Log::Dispatch->new(
@@ -45,7 +45,7 @@ throws_ok {
         ],
     );
 }
-qr/^socket host must be set/, 'empty socket host';
+qr/socket host must be set/, 'empty socket host';
 
 throws_ok {
     Log::Dispatch->new(
@@ -61,7 +61,7 @@ throws_ok {
         ],
     );
 }
-qr/^socket port must be integer/, 'invalid socket port';
+qr/socket port must be integer/, 'invalid socket port';
 
 throws_ok {
     Log::Dispatch->new(
@@ -78,7 +78,7 @@ throws_ok {
         ],
     );
 }
-qr/^socket protocol must be tcp or udp/, 'invalid protocol';
+qr/socket protocol must be tcp or udp/, 'invalid protocol';
 
 my $LAST_LOG_MSG;
 my $class_inet = qclass(

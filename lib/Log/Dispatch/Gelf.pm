@@ -42,7 +42,6 @@ sub _init {
                         my ($socket) = @_;
 
                         $socket->{protocol} //= 'udp';
-
                         die 'socket protocol must be tcp or udp' unless $socket->{protocol} =~ /^tcp|udp$/;
                     },
                     host_must_be_set => sub {
@@ -54,7 +53,6 @@ sub _init {
                         my ($socket) = @_;
 
                         $socket->{port} //= 12201;
-
                         die 'socket port must be integer' unless $socket->{port} =~ /^\d+$/;
                     }
                 }
