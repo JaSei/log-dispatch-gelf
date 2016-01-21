@@ -70,7 +70,13 @@ sub _init {
     $self->{gelf_version}      = '1.1';
 
     if ($p{socket}) {
-        $self->_create_socket($p{socket});
+        my $socket = $self->_create_socket($p{socket});
+
+        $self->{send_sub} = sub {
+            my ($msg) = @_;
+
+            $socket->send($msg);
+        };
     }
 
     my $i = 0;
@@ -83,17 +89,11 @@ sub _create_socket {
     my ($self, $socket_opts) = @_;
 
     require IO::Socket::INET;
-    my $socket = IO::Socket::INET->new(
+    return IO::Socket::INET->new(
         PeerAddr => $socket_opts->{host},
         PeerPort => $socket_opts->{port},
         Proto    => $socket_opts->{protocol},
     ) or die "Cannot create socket: $!";
-
-    $self->{send_sub} = sub {
-        my ($msg) = @_;
-
-        $socket->send($msg);
-    };
 }
 
 sub log_message {
