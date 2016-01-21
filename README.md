@@ -65,4 +65,4 @@ it under the same terms as Perl itself.
 
 # AUTHOR
 
-Miroslav Tynovsky <tynovsky@avast.com>
+Miroslav Tynovsky &lt;tynovsky@avast.com>
