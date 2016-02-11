@@ -6,11 +6,12 @@ use warnings;
 our $VERSION = '1.0.0';
 
 use base qw(Log::Dispatch::Output);
-use Params::Validate qw(validate SCALAR HASHREF CODEREF);
+use Params::Validate qw(validate SCALAR HASHREF CODEREF BOOLEAN);
 
 use Sys::Hostname;
 use JSON;
 use Time::HiRes qw(time);
+use IO::Compress::Gzip qw(gzip $GzipError);
 
 sub new {
     my $proto = shift;
@@ -34,6 +35,7 @@ sub _init {
             send_sub          => { type => CODEREF, optional => 1 },
             additional_fields => { type => HASHREF, optional => 1 },
             host              => { type => SCALAR,  optional => 1 },
+            compress          => { type => BOOLEAN, optional => 1 },
             socket            => {
                 type      => HASHREF,
                 optional  => 1,
@@ -74,6 +76,13 @@ sub _init {
 
         $self->{send_sub} = sub {
             my ($msg) = @_;
+
+            if ( $p{compress} ) {
+                my $msgz;
+                gzip \$msg => \$msgz
+                  or die "gzip failed: $GzipError";
+                $msg = $msgz;
+            }
 
             $socket->send($msg);
         };
