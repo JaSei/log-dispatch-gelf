@@ -89,11 +89,13 @@ sub _create_socket {
     my ($self, $socket_opts) = @_;
 
     require IO::Socket::INET;
-    return IO::Socket::INET->new(
+    my $socket = IO::Socket::INET->new(
         PeerAddr => $socket_opts->{host},
         PeerPort => $socket_opts->{port},
         Proto    => $socket_opts->{protocol},
     ) or die "Cannot create socket: $!";
+
+    return $socket;
 }
 
 sub log_message {
