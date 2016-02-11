@@ -7,6 +7,7 @@ use Log::Dispatch;
 use JSON;
 use Test::Exception;
 use Mock::Quick;
+use IO::Uncompress::Gunzip qw(gunzip $GunzipError);
 
 throws_ok {
     Log::Dispatch->new(
@@ -118,4 +119,30 @@ is($msg->{level},         6,                         'correct level info');
 is($msg->{short_message}, 'It works',                'short_message correct');
 is($msg->{full_message},  "It works\nMore details.", 'full_message correct');
 
-done_testing(9);
+$log = Log::Dispatch->new(
+    outputs => [
+        [
+            'Gelf',
+            min_level => 'debug',
+            compress => 1,
+            socket    => {
+                host => 'test',
+            }
+        ]
+    ],
+);
+
+$log->info("Compressed\nMore details.");
+
+my $output;
+gunzip \$LAST_LOG_MSG => \$output
+    or die "gunzip failed: $GunzipError\n";
+
+note("formatted message: $output");
+
+$msg = decode_json($output);
+is($msg->{level},         6,                           'correct level info');
+is($msg->{short_message}, 'Compressed',                'short_message correct');
+is($msg->{full_message},  "Compressed\nMore details.", 'full_message correct');
+
+done_testing(13);

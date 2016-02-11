@@ -6,11 +6,12 @@ use warnings;
 our $VERSION = '1.0.0';
 
 use base qw(Log::Dispatch::Output);
-use Params::Validate qw(validate SCALAR HASHREF CODEREF);
+use Params::Validate qw(validate SCALAR HASHREF CODEREF BOOLEAN);
 
 use Sys::Hostname;
 use JSON;
 use Time::HiRes qw(time);
+use IO::Compress::Gzip qw(gzip $GzipError);
 
 sub new {
     my $proto = shift;
@@ -34,6 +35,7 @@ sub _init {
             send_sub          => { type => CODEREF, optional => 1 },
             additional_fields => { type => HASHREF, optional => 1 },
             host              => { type => SCALAR,  optional => 1 },
+            compress          => { type => BOOLEAN, optional => 1 },
             socket            => {
                 type      => HASHREF,
                 optional  => 1,
@@ -75,6 +77,13 @@ sub _init {
         $self->{send_sub} = sub {
             my ($msg) = @_;
 
+            if ( $p{compress} ) {
+                my $msgz;
+                gzip \$msg => \$msgz
+                  or die "gzip failed: $GzipError";
+                $msg = $msgz;
+            }
+
             $socket->send($msg);
         };
     }
@@ -89,11 +98,13 @@ sub _create_socket {
     my ($self, $socket_opts) = @_;
 
     require IO::Socket::INET;
-    return IO::Socket::INET->new(
+    my $socket = IO::Socket::INET->new(
         PeerAddr => $socket_opts->{host},
         PeerPort => $socket_opts->{port},
         Proto    => $socket_opts->{protocol},
     ) or die "Cannot create socket: $!";
+
+    return $socket;
 }
 
 sub log_message {
@@ -174,6 +185,10 @@ parameters documented in L<Log::Dispatch::Output>:
 optional hashref of additional fields of the gelf message (no need to prefix
 them with _, the prefixing is done automatically).
 
+=item compress
+
+optional scalar. If a true value the message will be gzipped with
+IO::Compress::Gzip.
 
 =item send_sub
 
