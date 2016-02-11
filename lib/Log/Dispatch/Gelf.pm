@@ -185,6 +185,10 @@ parameters documented in L<Log::Dispatch::Output>:
 optional hashref of additional fields of the gelf message (no need to prefix
 them with _, the prefixing is done automatically).
 
+=item compress
+
+optional scalar. If a true value the message will be gzipped with
+IO::Compress::Gzip.
 
 =item send_sub
 
