@@ -55,7 +55,7 @@ sub _init {
                         # WAN: 1500 - 8 b (UDP header) - 60 b (max IP header) - 12 b (chunking header) = 1420 b
                         # LAN: 8192 - 8 b (UDP header) - 20 b (min IP header) - 12 b (chunking header) = 8152 b
                         # Note that based on my calculation the Graylog LAN
-                        #  default may be 2 bytes too big (8194)
+                        #  default may be 2 bytes too big (8154)
                         # See http://stackoverflow.com/questions/14993000/the-most-reliable-and-efficient-udp-packet-size
                         # For some discussion. I don't think this is an exact science!
                         if ( lc($1) eq 'wan' ) {
