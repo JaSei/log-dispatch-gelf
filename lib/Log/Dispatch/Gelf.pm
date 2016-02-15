@@ -47,11 +47,22 @@ sub _init {
                         die 'chunked must be "wan", "lan", or a positive integer'
                             unless $chunked =~ /^(wan|lan|\d+)$/i;
 
+                        # These default values below were determined by
+                        # examining the code for Graylog's implementation. See
+                        #  https://github.com/Graylog2/gelf-rb/blob/master/lib/gelf/notifier.rb#L62
+                        # I believe these ae determined by likely MTU defaults
+                        #  and possible heasers like so...
+                        # WAN: 1500 - 8 b (UDP header) - 60 b (max IP header) - 12 b (chunking header) = 1420 b
+                        # LAN: 8192 - 8 b (UDP header) - 20 b (min IP header) - 12 b (chunking header) = 8152 b
+                        # Note that based on my calculation the Graylog LAN
+                        #  default may be 2 bytes too big (8194)
+                        # See http://stackoverflow.com/questions/14993000/the-most-reliable-and-efficient-udp-packet-size
+                        # For some discussion. I don't think this is an exact science!
                         if ( lc($1) eq 'wan' ) {
                             $self->{chunked} = 1420;
                         }
                         elsif ( lc($1) eq 'lan' ) {
-                            $self->{chunked} = 8154;
+                            $self->{chunked} = 8152;
                         }
                         else {
                             $self->{chunked} = $1;
