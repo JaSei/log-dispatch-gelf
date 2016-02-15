@@ -80,12 +80,6 @@ sub _init {
                         $socket->{port} //= 12201;
                         die 'socket port must be integer' unless $socket->{port} =~ /^\d+$/;
                     },
-                    protocol_udp_if_chunked => sub {
-                        my ($socket) = @_;
-
-                        die 'socket chunked only applicable to udp'
-                            unless ! exists $socket->{chunked} || $socket->{protocol} eq 'udp';
-                    },
                 }
             }
         }
