@@ -12,6 +12,7 @@ use Sys::Hostname;
 use JSON;
 use Time::HiRes qw(time);
 use IO::Compress::Gzip qw(gzip $GzipError);
+use Math::Random::MT qw(irand);
 
 sub new {
     my $proto = shift;
@@ -36,6 +37,28 @@ sub _init {
             additional_fields => { type => HASHREF, optional => 1 },
             host              => { type => SCALAR,  optional => 1 },
             compress          => { type => BOOLEAN, optional => 1 },
+            chunked           => {
+                type => SCALAR,
+                optional => 1,
+                callbacks => {
+                    check_valid_size => sub {
+                        my ($chunked) = @_;
+
+                        die 'chunked must be "wan", "lan", or a positive integer'
+                            unless $chunked =~ /^(wan|lan|\d+)$/i;
+
+                        if ( lc($1) eq 'wan' ) {
+                            $self->{chunked} = 1420;
+                        }
+                        elsif ( lc($1) eq 'lan' ) {
+                            $self->{chunked} = 8154;
+                        }
+                        else {
+                            $self->{chunked} = $1;
+                        }
+                    },
+                },
+            },
             socket            => {
                 type      => HASHREF,
                 optional  => 1,
@@ -56,7 +79,13 @@ sub _init {
 
                         $socket->{port} //= 12201;
                         die 'socket port must be integer' unless $socket->{port} =~ /^\d+$/;
-                    }
+                    },
+                    protocol_udp_if_chunked => sub {
+                        my ($socket) = @_;
+
+                        die 'socket chunked only applicable to udp'
+                            unless ! exists $socket->{chunked} || $socket->{protocol} eq 'udp';
+                    },
                 }
             }
         }
@@ -66,9 +95,17 @@ sub _init {
         die 'Must be set socket or send_sub';
     }
 
+    if ( defined $p{socket}
+         && defined $p{chunked}
+         && $p{socket}{protocol} ne 'udp'
+    ) {
+        die 'chunked only applicable to udp';
+    }
+
     $self->{host}              = $p{host}              // hostname();
     $self->{additional_fields} = $p{additional_fields} // {};
     $self->{send_sub}          = $p{send_sub};
+    $self->{chunked}           = $p{chunked};
     $self->{gelf_version}      = '1.1';
 
     if ($p{socket}) {
@@ -77,14 +114,8 @@ sub _init {
         $self->{send_sub} = sub {
             my ($msg) = @_;
 
-            if ( $p{compress} ) {
-                my $msgz;
-                gzip \$msg => \$msgz
-                  or die "gzip failed: $GzipError";
-                $msg = $msgz;
-            }
-
-            $socket->send($msg);
+            $msg = $self->_compress($msg) if $p{compress};
+            $socket->send($_) foreach $self->_chunks($msg);
         };
     }
 
@@ -92,6 +123,52 @@ sub _init {
     $self->{number_of_loglevel}{$_} = $i++ for qw(emergency alert critical error warning notice info debug);
 
     return;
+}
+
+sub _compress {
+    my ($self, $msg) = @_;
+
+    my $msgz;
+    gzip \$msg => \$msgz
+      or die "gzip failed: $GzipError";
+
+    return $msgz;
+}
+
+sub _chunks {
+    my ($self, $msg) = @_;
+
+    if ( defined $self->{chunked}
+         && length $msg > $self->{chunked}
+    ) {
+        my @chunks;
+        while (length $msg) {
+            push @chunks, substr $msg, 0, $self->{chunked}, '';
+        }
+
+        my $n_chunks = scalar @chunks;
+        die 'Message too big' if $n_chunks > 128;
+
+        my $magic          = pack('C*', 0x1e,0x0f); # Chunked GELF magic bytes
+        my $message_id     = pack('L*', irand(),irand());
+        my $sequence_count = pack('C*', $n_chunks);
+
+        my @chunks_w_header;
+        my $sequence_number = 0;
+        foreach my $chunk (@chunks) {
+           push @chunks_w_header,
+              $magic
+              . $message_id
+              . pack('C*',$sequence_number++)
+              . $sequence_count
+              . $chunk;
+        }
+
+        return @chunks_w_header;
+    }
+    else {
+         return ($msg);
+    }
 }
 
 sub _create_socket {
@@ -184,6 +261,13 @@ parameters documented in L<Log::Dispatch::Output>:
 
 optional hashref of additional fields of the gelf message (no need to prefix
 them with _, the prefixing is done automatically).
+
+=item chunked
+
+optional scalar. An integer specifying the chunk size or the special
+string values 'lan' or 'wan' corresponging to 8154 or 1420 respectively.
+
+Chunking is only applicable to UDP connections.
 
 =item compress
 
