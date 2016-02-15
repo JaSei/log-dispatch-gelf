@@ -98,6 +98,34 @@ throws_ok {
 }
 qr/chunked must be "wan", "lan", or a positive integer/, 'invalid integer';
 
+new_ok ( 'Log::Dispatch', [
+        outputs => [
+            [
+                'Gelf',
+                min_level => 'debug',
+                chunked  => 'WAN',
+                socket    => {
+                    host => 'test',
+                }
+            ]
+        ]
+    ]
+);
+
+new_ok ( 'Log::Dispatch', [
+        outputs => [
+            [
+                'Gelf',
+                min_level => 'debug',
+                chunked  => 'lan',
+                socket    => {
+                    host => 'test',
+                }
+            ]
+        ]
+    ]
+);
+
 my $log = Log::Dispatch->new(
     outputs => [
         [
@@ -148,4 +176,4 @@ is($msg->{level},         6,                                     'correct level 
 is($msg->{short_message}, 'Compressed - chunked',                'short_message correct');
 is($msg->{full_message},  "Compressed - chunked\nMore details.", 'full_message correct');
 
-done_testing(9);
+done_testing(11);

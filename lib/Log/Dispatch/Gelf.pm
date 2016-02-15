@@ -105,7 +105,6 @@ sub _init {
     $self->{host}              = $p{host}              // hostname();
     $self->{additional_fields} = $p{additional_fields} // {};
     $self->{send_sub}          = $p{send_sub};
-    $self->{chunked}           = $p{chunked};
     $self->{gelf_version}      = '1.1';
 
     if ($p{socket}) {
