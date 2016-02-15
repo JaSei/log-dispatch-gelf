@@ -81,6 +81,23 @@ throws_ok {
 }
 qr/socket protocol must be tcp or udp/, 'invalid protocol';
 
+throws_ok {
+    Log::Dispatch->new(
+        outputs => [
+            [
+                'Gelf',
+                min_level => 'debug',
+                'socket'  => {
+                    host     => 'test',
+                    port     => '111111',
+                    protocol => 'xxx-udp',
+                }
+            ]
+        ],
+    );
+}
+qr/socket protocol must be tcp or udp/, 'invalid protocol 2';
+
 my $LAST_LOG_MSG;
 my $class_inet = qclass(
     -implement => 'IO::Socket::INET',
@@ -145,4 +162,4 @@ is($msg->{level},         6,                           'correct level info');
 is($msg->{short_message}, 'Compressed',                'short_message correct');
 is($msg->{full_message},  "Compressed\nMore details.", 'full_message correct');
 
-done_testing(13);
+done_testing(14);
