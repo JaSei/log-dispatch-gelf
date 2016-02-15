@@ -29,8 +29,6 @@ my $class_inet = qclass(
         my $msg_seq_no  = unpack('C', shift @msg);
         my $msg_seq_cnt = unpack('C', shift @msg);
 
-        $self->{last_msg_id} = $msg_id;
-
         if ( $msg_magic eq $magic ) {
             die "sequence_number > sequence count - should not happen"
               if $msg_seq_no > $msg_seq_cnt;
@@ -38,8 +36,10 @@ my $class_inet = qclass(
             die "message_id <> last message_id - should not happen"
               if defined $self->{last_msg_id} && $self->{last_msg_id} ne $msg_id;
 
+            $self->{last_msg_id} = $msg_id;
+
             $CHUNKED_MESSAGE .= join '', @msg;
-            
+
         }
         else {
             die "message not chunked";
