@@ -4,7 +4,7 @@
       "Miroslav Tynovsky <tynovsky@avast.com>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v2.5.0, CPAN::Meta::Converter version 2.150005",
+   "generated_by" : "Minilla/v3.0.1, CPAN::Meta::Converter version 2.150005",
    "license" : [
       "perl_5"
    ],
@@ -47,6 +47,7 @@
          "requires" : {
             "JSON" : "0",
             "Log::Dispatch" : "0",
+            "Math::Random::MT" : "0",
             "Time::HiRes" : "0",
             "perl" : "5.010"
          }
@@ -71,9 +72,10 @@
          "web" : "https://github.com/avast/log-dispatch-gelf"
       }
    },
-   "version" : "1.0.0",
+   "version" : "1.1.0",
    "x_contributors" : [
       "Jan Seidl <seidl@avast.com>",
+      "Adam Clarke <adam.clarke@strategicdata.com.au>",
       "tynovsky <tynovsky@seznam.cz>"
    ],
    "x_serialization_backend" : "JSON::PP version 2.27300"

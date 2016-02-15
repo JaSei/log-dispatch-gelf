@@ -2,6 +2,10 @@ Revision history for Perl extension Log-Dispatch-Gelf
 
 {{$NEXT}}
 
+1.1.0 2016-02-15T13:51:56Z
+    - compression (ADAMC)
+    - UDP chunking (ADAMC)
+
 1.0.0 2016-01-21T11:28:23Z
 
     - support for direct logging through Graylog's UDP or TCP socket

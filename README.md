@@ -46,6 +46,18 @@ parameters documented in [Log::Dispatch::Output](https://metacpan.org/pod/Log::D
     optional hashref of additional fields of the gelf message (no need to prefix
     them with \_, the prefixing is done automatically).
 
+- chunked
+
+    optional scalar. An integer specifying the chunk size or the special
+    string values 'lan' or 'wan' corresponging to 8154 or 1420 respectively.
+
+    Chunking is only applicable to UDP connections.
+
+- compress
+
+    optional scalar. If a true value the message will be gzipped with
+    IO::Compress::Gzip.
+
 - send\_sub
 
     mandatory sub for sending the message to graylog. It is triggered after the
