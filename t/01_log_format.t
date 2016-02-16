@@ -57,7 +57,7 @@ ok($msg->{timestamp}, 'timestamp is there');
 ok($msg->{version}, 'version is there');
 
 $log->log(
-    level            => 'info',
+    level             => 'info',
     message           => "It works\nMore details.",
     additional_fields => { facility => 'override' }
 );
@@ -68,8 +68,8 @@ $msg = decode_json($LAST_LOG_MSG);
 is($msg->{_facility}, 'override', 'facility overridden correctly');
 
 $log->log(
-    level            => 'info',
-    message           => "It works\nMore details.",
+    level   => 'info',
+    message => "It works\nMore details.",
 );
 
 note "formatted message: $LAST_LOG_MSG";
