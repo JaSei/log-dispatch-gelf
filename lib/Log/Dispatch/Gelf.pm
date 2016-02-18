@@ -3,7 +3,7 @@ use 5.010;
 use strict;
 use warnings;
 
-our $VERSION = '1.1.0';
+our $VERSION = '1.2.0';
 
 use base qw(Log::Dispatch::Output);
 use Params::Validate qw(validate SCALAR HASHREF CODEREF BOOLEAN);
@@ -324,7 +324,7 @@ C<send_sub> to sending via socket
 In addition to the corresponding method in L<Log::Dispatch::Output> this
 subclassed method takes an optional hashref of additional_fields for the
 gelf message. As in the corresponding parameter on the constructor there is
-no need to previx them with an _. If the same key appears in both the
+no need to prefix them with an _. If the same key appears in both the
 constructor's and method's additional_fields then the method's value will
 take precedence overriding the constructor's value for the current call.
 

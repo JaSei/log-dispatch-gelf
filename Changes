@@ -2,6 +2,9 @@ Revision history for Perl extension Log-Dispatch-Gelf
 
 {{$NEXT}}
 
+1.2.0 2016-02-18T10:13:10Z
+    - custom additional fields in log method (ADAMC)
+
 1.1.0 2016-02-15T13:51:56Z
     - compression (ADAMC)
     - UDP chunking (ADAMC)
