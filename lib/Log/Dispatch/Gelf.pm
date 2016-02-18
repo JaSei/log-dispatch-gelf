@@ -197,6 +197,10 @@ sub log_message {
         $additional_fields{"_$key"} = $value;
     }
 
+    while (my ($key, $value) = each %{ $p{additional_fields} }) {
+        $additional_fields{"_$key"} = $value;
+    }
+
     my $log_unit = {
         version       => $self->{gelf_version},
         host          => $self->{host},
@@ -210,6 +214,21 @@ sub log_message {
     $self->{send_sub}->(to_json($log_unit, { canonical => 1 }) . "\n");
 
     return;
+}
+
+sub log {
+    my $self = shift;
+
+    my %p = validate(
+        @_, {
+            additional_fields => {
+                type => HASHREF,
+                optional => 1,
+            },
+        }
+    );
+
+    $self->SUPER::log(@_);
 }
 
 1;
@@ -250,11 +269,19 @@ Log::Dispatch::Gelf - Log::Dispatch plugin for Graylog's GELF format.
     );
     $log->info('It works');
 
+    $log->log(
+        level             => 'info',
+        message           => "It works\nMore details.",
+        additional_fields => { test => 1 }
+    );
+
 =head1 DESCRIPTION
 
-Log::Dispatch::Gelf is Log::Dispatch plugin which formats the log message
-according to Graylog's GELF Format version 1.1 and sends it using user-provided
-sender.
+Log::Dispatch::Gelf is a Log::Dispatch plugin which formats the log message
+according to Graylog's GELF Format version 1.1. It supports sending via a
+socket (TCP or UDP) or a user provided sender.
+
+=head1 CONSTRUCTOR
 
 The constructor takes the following parameters in addition to the standard
 parameters documented in L<Log::Dispatch::Output>:
@@ -283,13 +310,25 @@ IO::Compress::Gzip.
 mandatory sub for sending the message to graylog. It is triggered after the
 gelf message is generated.
 
-
 =item socket
 
 optional hashref create tcp or udp (default behavior) socket and set
 C<send_sub> to sending via socket
 
 =back
+
+=head1 METHODS
+
+=head2 $log->log( level => $, message => $, additional_fields => \% )
+
+In addition to the corresponding method in L<Log::Dispatch::Output> this
+subclassed method takes an optional hashref of additional_fields for the
+gelf message. As in the corresponding parameter on the constructor there is
+no need to previx them with an _. If the same key appears in both the
+constructor's and method's additional_fields then the method's value will
+take precedence overriding the constructor's value for the current call.
+
+The subclassed log method is still called with all parameters passed on.
 
 =head1 LICENSE
 
