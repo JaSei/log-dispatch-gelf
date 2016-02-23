@@ -39,15 +39,7 @@ sub _init {
             additional_fields => { type => HASHREF, optional => 1 },
             host              => { type => SCALAR,  optional => 1 },
             compress          => { type => BOOLEAN, optional => 1 },
-            chunked           => {
-                default  => 0,
-                type     => SCALAR,
-                callbacks => {
-                    size => sub {
-                        parse_size(shift());
-                    }
-                }
-            },
+            chunked           => { type => SCALAR,  default  => 0 },
             socket            => {
                 type      => HASHREF,
                 optional  => 1,
@@ -73,6 +65,8 @@ sub _init {
             }
         }
     );
+
+    $p{chunked} = parse_size($p{chunked});
 
     if (!defined $p{socket} && !defined $p{send_sub}) {
         die 'Must be set socket or send_sub';
@@ -101,9 +95,6 @@ sub _init {
             $socket->send($_) foreach enchunk($msg, $self->{chunked});
         };
     }
-
-    my $i = 0;
-    $self->{number_of_loglevel}{$_} = $i++ for qw(emergency alert critical error warning notice info debug);
 
     return;
 }
@@ -138,7 +129,7 @@ sub log_message {
         version       => $self->{gelf_version},
         host          => $self->{host},
         short_message => $short_message,
-        level         => $self->{number_of_loglevel}{ $p{level} },
+        level         => $p{level},
         full_message  => $p{message},
         %additional_fields,
     };
@@ -154,7 +145,7 @@ sub log {
     my %p = validate(
         @_, {
             additional_fields => {
-                type => HASHREF,
+                type     => HASHREF,
                 optional => 1,
             },
         }
@@ -229,6 +220,7 @@ them with _, the prefixing is done automatically).
 
 optional scalar. An integer specifying the chunk size or the special
 string values 'lan' or 'wan' corresponging to 8154 or 1420 respectively.
+A zero chunk size means no chunking will be applied.
 
 Chunking is only applicable to UDP connections.
 
