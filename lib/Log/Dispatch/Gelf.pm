@@ -8,11 +8,13 @@ our $VERSION = '1.2.0';
 use base qw(Log::Dispatch::Output);
 use Params::Validate qw(validate SCALAR HASHREF CODEREF BOOLEAN);
 
+use Log::GELF::Util qw(
+    parse_size
+    compress
+    enchunk
+    encode
+);
 use Sys::Hostname;
-use JSON;
-use Time::HiRes qw(time);
-use IO::Compress::Gzip qw(gzip $GzipError);
-use Math::Random::MT qw(irand);
 
 sub new {
     my $proto = shift;
@@ -38,37 +40,13 @@ sub _init {
             host              => { type => SCALAR,  optional => 1 },
             compress          => { type => BOOLEAN, optional => 1 },
             chunked           => {
-                type => SCALAR,
-                optional => 1,
+                default  => 0,
+                type     => SCALAR,
                 callbacks => {
-                    check_valid_size => sub {
-                        my ($chunked) = @_;
-
-                        die 'chunked must be "wan", "lan", or a positive integer'
-                            unless $chunked =~ /^(wan|lan|\d+)$/i;
-
-                        # These default values below were determined by
-                        # examining the code for Graylog's implementation. See
-                        #  https://github.com/Graylog2/gelf-rb/blob/master/lib/gelf/notifier.rb#L62
-                        # I believe these ae determined by likely MTU defaults
-                        #  and possible heasers like so...
-                        # WAN: 1500 - 8 b (UDP header) - 60 b (max IP header) - 12 b (chunking header) = 1420 b
-                        # LAN: 8192 - 8 b (UDP header) - 20 b (min IP header) - 12 b (chunking header) = 8152 b
-                        # Note that based on my calculation the Graylog LAN
-                        #  default may be 2 bytes too big (8154)
-                        # See http://stackoverflow.com/questions/14993000/the-most-reliable-and-efficient-udp-packet-size
-                        # For some discussion. I don't think this is an exact science!
-                        if ( lc($1) eq 'wan' ) {
-                            $self->{chunked} = 1420;
-                        }
-                        elsif ( lc($1) eq 'lan' ) {
-                            $self->{chunked} = 8152;
-                        }
-                        else {
-                            $self->{chunked} = $1;
-                        }
-                    },
-                },
+                    size => sub {
+                        parse_size(shift());
+                    }
+                }
             },
             socket            => {
                 type      => HASHREF,
@@ -111,6 +89,7 @@ sub _init {
     $self->{additional_fields} = $p{additional_fields} // {};
     $self->{send_sub}          = $p{send_sub};
     $self->{gelf_version}      = '1.1';
+    $self->{chunked}           = $p{chunked};
 
     if ($p{socket}) {
         my $socket = $self->_create_socket($p{socket});
@@ -118,8 +97,8 @@ sub _init {
         $self->{send_sub} = sub {
             my ($msg) = @_;
 
-            $msg = $self->_compress($msg) if $p{compress};
-            $socket->send($_) foreach $self->_chunks($msg);
+            $msg = compress($msg) if $p{compress};
+            $socket->send($_) foreach enchunk($msg, $self->{chunked});
         };
     }
 
@@ -127,52 +106,6 @@ sub _init {
     $self->{number_of_loglevel}{$_} = $i++ for qw(emergency alert critical error warning notice info debug);
 
     return;
-}
-
-sub _compress {
-    my ($self, $msg) = @_;
-
-    my $msgz;
-    gzip \$msg => \$msgz
-      or die "gzip failed: $GzipError";
-
-    return $msgz;
-}
-
-sub _chunks {
-    my ($self, $msg) = @_;
-
-    if ( defined $self->{chunked}
-         && length $msg > $self->{chunked}
-    ) {
-        my @chunks;
-        while (length $msg) {
-            push @chunks, substr $msg, 0, $self->{chunked}, '';
-        }
-
-        my $n_chunks = scalar @chunks;
-        die 'Message too big' if $n_chunks > 128;
-
-        my $magic          = pack('C*', 0x1e,0x0f); # Chunked GELF magic bytes
-        my $message_id     = pack('L*', irand(),irand());
-        my $sequence_count = pack('C*', $n_chunks);
-
-        my @chunks_w_header;
-        my $sequence_number = 0;
-        foreach my $chunk (@chunks) {
-           push @chunks_w_header,
-              $magic
-              . $message_id
-              . pack('C*',$sequence_number++)
-              . $sequence_count
-              . $chunk;
-        }
-
-        return @chunks_w_header;
-    }
-    else {
-         return ($msg);
-    }
 }
 
 sub _create_socket {
@@ -205,13 +138,12 @@ sub log_message {
         version       => $self->{gelf_version},
         host          => $self->{host},
         short_message => $short_message,
-        timestamp     => time(),
         level         => $self->{number_of_loglevel}{ $p{level} },
         full_message  => $p{message},
         %additional_fields,
     };
 
-    $self->{send_sub}->(to_json($log_unit, { canonical => 1 }) . "\n");
+    $self->{send_sub}->(encode($log_unit));
 
     return;
 }
