@@ -64,6 +64,40 @@ throws_ok {
 }
 qr/chunked only applicable to udp/, 'invalid protocol for chunking';
 
+throws_ok {
+    Log::Dispatch->new(
+        outputs => [
+            [
+                'Gelf',
+                min_level => 'debug',
+                chunked   => 'xxx',
+                'socket'  => {
+                    host     => 'test',
+                    protocol => 'udp',
+                }
+            ]
+        ],
+    );
+}
+qr/chunk size must be "lan", "wan", a positve integer, or 0 \(no chunking\)/, 'invalid chunked value';
+
+throws_ok {
+    Log::Dispatch->new(
+        outputs => [
+            [
+                'Gelf',
+                min_level => 'debug',
+                chunked   => '-1',
+                'socket'  => {
+                    host     => 'test',
+                    protocol => 'udp',
+                }
+            ]
+        ],
+    );
+}
+qr/chunk size must be "lan", "wan", a positve integer, or 0 \(no chunking\)/, 'invalid integer';
+
 new_ok ( 'Log::Dispatch', [
         outputs => [
             [
@@ -142,4 +176,4 @@ is($msg->{level},         6,                                     'correct level 
 is($msg->{short_message}, 'Compressed - chunked',                'short_message correct');
 is($msg->{full_message},  "Compressed - chunked\nMore details.", 'full_message correct');
 
-done_testing(9);
+done_testing(11);
