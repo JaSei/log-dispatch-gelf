@@ -23,9 +23,9 @@ my $class_inet = qclass(
     send => sub {
         my ($self, $encoded_chunk) = @_;
         
-        $MESSAGE = Log::GELF::Util::dechunk(
+        $MESSAGE = dechunk(
             \@ACCUMULATOR,
-            Log::GELF::Util::decode_chunk($encoded_chunk)
+            decode_chunk($encoded_chunk)
         );
 
         $MESSAGE = uncompress($MESSAGE) if $MESSAGE;
