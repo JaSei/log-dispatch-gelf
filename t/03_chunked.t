@@ -10,13 +10,13 @@ use Test::Exception;
 use Mock::Quick;
 use IO::Uncompress::Gunzip qw(gunzip $GunzipError);
 
-my @CHUNKED_MESSAGE_ACCUMULATOR;
+my @ACCUMULATOR;
 my $MESSAGE;
 my $class_inet = qclass(
     -implement => 'IO::Socket::INET',
     new        => sub {
         my ($obj, %options) = @_;
-        @CHUNKED_MESSAGE_ACCUMULATOR = undef;
+        @ACCUMULATOR = undef;
         $MESSAGE                     = undef;
         return bless {}, $obj;
     },
@@ -24,7 +24,7 @@ my $class_inet = qclass(
         my ($self, $encoded_chunk) = @_;
         
         $MESSAGE = Log::GELF::Util::dechunk(
-            \@CHUNKED_MESSAGE_ACCUMULATOR,
+            \@ACCUMULATOR,
             Log::GELF::Util::decode_chunk($encoded_chunk)
         );
 
