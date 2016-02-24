@@ -4,46 +4,32 @@ use warnings;
 use Test::More;
 
 use Log::Dispatch;
+use Log::GELF::Util qw(dechunk decode_chunk uncompress);
 use JSON;
 use Test::Exception;
 use Mock::Quick;
 use IO::Uncompress::Gunzip qw(gunzip $GunzipError);
 
-my $CHUNKED_MESSAGE;
+my @CHUNKED_MESSAGE_ACCUMULATOR;
+my $MESSAGE;
 my $class_inet = qclass(
     -implement => 'IO::Socket::INET',
     new        => sub {
         my ($obj, %options) = @_;
-        $CHUNKED_MESSAGE = undef;
+        @CHUNKED_MESSAGE_ACCUMULATOR = undef;
+        $MESSAGE                     = undef;
         return bless {}, $obj;
     },
     send => sub {
-        my ($self, $msg) = @_;
+        my ($self, $encoded_chunk) = @_;
         
-        my $magic = pack('C*', 0x1e, 0x0f);
-        
-        my @msg = split //, $msg;
-        
-        my $msg_magic   = join '', splice @msg, 0, 2;
-        my $msg_id      = unpack('LL', join '', splice @msg, 0, 8);
-        my $msg_seq_no  = unpack('C', shift @msg);
-        my $msg_seq_cnt = unpack('C', shift @msg);
+        $MESSAGE = Log::GELF::Util::dechunk(
+            \@CHUNKED_MESSAGE_ACCUMULATOR,
+            Log::GELF::Util::decode_chunk($encoded_chunk)
+        );
 
-        if ( $msg_magic eq $magic ) {
-            die "sequence_number > sequence count - should not happen"
-              if $msg_seq_no > $msg_seq_cnt;
+        $MESSAGE = uncompress($MESSAGE) if $MESSAGE;
 
-            die "message_id <> last message_id - should not happen"
-              if defined $self->{last_msg_id} && $self->{last_msg_id} ne $msg_id;
-
-            $self->{last_msg_id} = $msg_id;
-
-            $CHUNKED_MESSAGE .= join '', @msg;
-
-        }
-        else {
-            die "message not chunked";
-        }
     }
 );
 
@@ -141,9 +127,9 @@ my $log = Log::Dispatch->new(
 
 $log->info("Uncompressed - chunked\nMore details.");
 
-note("formatted message: $CHUNKED_MESSAGE");
+note("formatted message: $MESSAGE");
 
-my $msg = decode_json($CHUNKED_MESSAGE);
+my $msg = decode_json($MESSAGE);
 
 is($msg->{level},         6,                                       'correct level info');
 is($msg->{short_message}, 'Uncompressed - chunked',                'short_message correct');
@@ -165,12 +151,9 @@ $log = Log::Dispatch->new(
 
 $log->info("Compressed - chunked\nMore details.");
 
-my $output;
-gunzip \$CHUNKED_MESSAGE => \$output
-    or die "gunzip failed: $GunzipError\n";
-note("formatted message: $output");
+note("formatted message: $MESSAGE");
 
-$msg = decode_json($output);
+$msg = decode_json($MESSAGE);
 
 is($msg->{level},         6,                                     'correct level info');
 is($msg->{short_message}, 'Compressed - chunked',                'short_message correct');
