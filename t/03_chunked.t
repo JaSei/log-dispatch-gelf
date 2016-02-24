@@ -17,7 +17,7 @@ my $class_inet = qclass(
     new        => sub {
         my ($obj, %options) = @_;
         @ACCUMULATOR = undef;
-        $MESSAGE                     = undef;
+        $MESSAGE     = undef;
         return bless {}, $obj;
     },
     send => sub {
