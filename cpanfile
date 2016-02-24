@@ -1,5 +1,6 @@
 requires 'perl', '5.010';
 requires 'Log::Dispatch';
+requires 'Log::GELF::Util', '0.90';
 requires 'Time::HiRes';
 requires 'JSON';
 requires 'Math::Random::MT';
