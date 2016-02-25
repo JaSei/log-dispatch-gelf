@@ -219,7 +219,7 @@ them with _, the prefixing is done automatically).
 =item chunked
 
 optional scalar. An integer specifying the chunk size or the special
-string values 'lan' or 'wan' corresponging to 8154 or 1420 respectively.
+string values 'lan' or 'wan' corresponding to 8154 or 1420 respectively.
 A zero chunk size means no chunking will be applied.
 
 Chunking is only applicable to UDP connections.
