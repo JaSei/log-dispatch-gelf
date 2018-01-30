@@ -47,6 +47,7 @@
          "requires" : {
             "Log::Dispatch" : "0",
             "Log::GELF::Util" : "0.90",
+            "Params::Validate" : "0",
             "perl" : "5.010"
          }
       },
