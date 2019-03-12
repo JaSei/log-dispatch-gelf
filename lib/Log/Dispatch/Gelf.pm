@@ -73,7 +73,7 @@ sub _init {
     }
 
     if ( defined $p{socket}
-         && defined $p{chunked}
+         && $p{chunked}
          && $p{socket}{protocol} ne 'udp'
     ) {
         die 'chunked only applicable to udp';
