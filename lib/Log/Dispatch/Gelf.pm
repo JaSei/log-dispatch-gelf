@@ -92,7 +92,12 @@ sub _init {
             my ($msg) = @_;
 
             $msg = compress($msg) if $p{compress};
-            $socket->send($_) foreach enchunk($msg, $self->{chunked});
+            foreach my $chunk (enchunk($msg, $self->{chunked})) {
+                if ($p{socket}{protocol} ne 'udp') {
+                    $chunk .= "\x00";
+                }
+                $socket->send($chunk);
+            }
         };
     }
 
