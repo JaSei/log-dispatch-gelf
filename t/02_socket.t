@@ -185,7 +185,7 @@ $log->log(
 );
 ok(substr($LAST_LOG_MSG, -1) eq "\x00", 'TCP transport ends with a null byte');
 note("formatted message: $LAST_LOG_MSG");
-my $msg = decode_json($LAST_LOG_MSG);
+$msg = decode_json($LAST_LOG_MSG);
 is($msg->{level},         6,                         'correct level info');
 is($msg->{short_message}, 'It works',                'short_message correct');
 is($msg->{full_message},  "It works\nMore details.", 'full_message correct');
