@@ -9,7 +9,7 @@ Log::Dispatch::Gelf - Log::Dispatch plugin for Graylog's GELF format.
 
     my $sender = ... # e.g. RabbitMQ queue.
     my $log = Log::Dispatch->new(
-        outputs => [ 
+        outputs => [
             #some custom sender
             [
                 'Gelf',
@@ -27,7 +27,15 @@ Log::Dispatch::Gelf - Log::Dispatch plugin for Graylog's GELF format.
                     port     => 21234,
                     protocol => 'tcp',
                 }
-            ]
+            ],
+            # define callback to crop your full message to short in your own way
+            [
+                'Gelf',
+                min_level         => 'debug',
+                additional_fields => { facility => __FILE__ },
+                send_sub          => sub { $sender->send($_[0]) },
+                short_message_sub => sub { substr($_[0], 0, 10) }
+            ],
         ],
     );
     $log->info('It works');
@@ -71,6 +79,12 @@ parameters documented in [Log::Dispatch::Output](https://metacpan.org/pod/Log::D
 
     mandatory sub for sending the message to graylog. It is triggered after the
     gelf message is generated.
+
+- short\_message\_sub
+
+    sub for code that will crop your full message to short message. By default
+    it deletes everything after first newline character
+
 
 - socket
 
