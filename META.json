@@ -42,7 +42,7 @@
       },
       "runtime" : {
          "recommends" : {
-            "JSON::XS" : "2.0"
+            "Cpanel::JSON::XS" : "4"
          },
          "requires" : {
             "Log::Dispatch" : "0",
@@ -53,7 +53,7 @@
       },
       "test" : {
          "requires" : {
-            "JSON" : "0",
+            "JSON::MaybeXS" : "0",
             "Mock::Quick" : "1.107",
             "Test::Exception" : "0.31",
             "Test::More" : "0.98"
