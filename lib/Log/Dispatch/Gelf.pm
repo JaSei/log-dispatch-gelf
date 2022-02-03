@@ -36,6 +36,7 @@ sub _init {
         @_,
         {
             send_sub          => { type => CODEREF, optional => 1 },
+            short_message_sub => { type => CODEREF, optional => 1 },
             additional_fields => { type => HASHREF, optional => 1 },
             host              => { type => SCALAR,  optional => 1 },
             compress          => { type => BOOLEAN, optional => 1 },
@@ -82,6 +83,7 @@ sub _init {
     $self->{host}              = $p{host}              // hostname();
     $self->{additional_fields} = $p{additional_fields} // {};
     $self->{send_sub}          = $p{send_sub};
+    $self->{short_message_sub} = $p{short_message_sub} // sub { $_[0] =~ s/\n.*//sr };
     $self->{gelf_version}      = '1.1';
     $self->{chunked}           = $p{chunked};
 
@@ -119,7 +121,6 @@ sub _create_socket {
 
 sub log_message {
     my ($self, %p) = @_;
-    (my $short_message = $p{message}) =~ s/\n.*//s;
 
     my %additional_fields;
     while (my ($key, $value) = each %{ $self->{additional_fields} }) {
@@ -133,7 +134,7 @@ sub log_message {
     my $log_unit = {
         version       => $self->{gelf_version},
         host          => $self->{host},
-        short_message => $short_message,
+        short_message => $self->{short_message_sub}->($p{message}),
         level         => $p{level},
         full_message  => $p{message},
         %additional_fields,
@@ -174,7 +175,7 @@ Log::Dispatch::Gelf - Log::Dispatch plugin for Graylog's GELF format.
 
     my $sender = ... # e.g. RabbitMQ queue.
     my $log = Log::Dispatch->new(
-        outputs => [ 
+        outputs => [
             #some custom sender
             [
                 'Gelf',
