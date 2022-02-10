@@ -3,7 +3,7 @@ use 5.010;
 use strict;
 use warnings;
 
-our $VERSION = '1.3.2';
+our $VERSION = '1.4.0';
 
 use base qw(Log::Dispatch::Output);
 use Params::Validate qw(validate SCALAR HASHREF CODEREF BOOLEAN);
