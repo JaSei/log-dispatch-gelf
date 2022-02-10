@@ -12,3 +12,6 @@ on 'test' => sub {
     requires 'JSON::MaybeXS';
 };
 
+on 'develop' => sub {
+  requires 'Minilla';
+};
